@@ -19,6 +19,8 @@ class CustomTextField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
+        obscuringCharacter: '•', // Optional: Custom obscuring character
+        keyboardType: obscureText ? TextInputType.visiblePassword : TextInputType.text,
         decoration: InputDecoration(
           hintText: hint,
           filled: true,
@@ -27,6 +29,14 @@ class CustomTextField extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: Colors.grey),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.blue), // Blue when focused
           ),
         ),
       ),

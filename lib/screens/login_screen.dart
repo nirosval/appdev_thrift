@@ -1,8 +1,25 @@
+import 'package:appdev_thrift/main.dart';
+import 'package:appdev_thrift/screens/dashboard.dart';
+import 'package:appdev_thrift/services/services_api.dart';
 import 'package:flutter/material.dart';
-import '../widgets/custom_button.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +62,11 @@ class LoginScreen extends StatelessWidget {
             top: screenHeight * 0.18,
             child: const Text(
               "Hello",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
           Positioned(
@@ -75,7 +96,11 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Login",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Padding(
@@ -83,17 +108,23 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         TextField(
+                          controller: emailController,
                           decoration: InputDecoration(
                             labelText: "Email",
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
                         TextField(
+                          controller: passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
                             labelText: "Password",
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ],
@@ -116,39 +147,106 @@ class LoginScreen extends StatelessWidget {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFA48C60),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      onPressed: () {},
-                      child: const Text("Login", style: TextStyle(color: Colors.white, fontSize: 18)),
+
+                      onPressed: () async {
+                        print("Raw email: '${emailController.text}'");
+                        print("Raw password: '${passwordController.text}'");
+
+                        String email = emailController.text.trim();
+                        String password = passwordController.text.trim();
+
+                        print("Trimmed email: '$email'");
+                        print("Trimmed password: '$password'");
+
+                        if (email.isEmpty || password.isEmpty) {
+                          print("One or both fields are empty!");
+                          print("Email: '$email'");
+                          print("Password: '$password'"); // Debug message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Email and Password required!"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final response = await ApiService.loginUser(
+                          email,
+                          password,
+                        );
+
+                        if (response != null && response['token'] != null) {
+                          //
+                          String? token = response['token'];
+                          print("Token: $token");
+                          await saveToken(token!);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Login Successful!")),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Dashboard(),
+                            ),
+                          ); // Change to your home screen
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Invalid credentials")),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(child: Container(height: 1, color: Colors.black26)),
+                      Expanded(
+                        child: Container(height: 1, color: Colors.black26),
+                      ),
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text("or connect with", style: TextStyle(fontSize: 12)),
+                        child: Text(
+                          "or connect with",
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
-                      Expanded(child: Container(height: 1, color: Colors.black26)),
+                      Expanded(
+                        child: Container(height: 1, color: Colors.black26),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {},
-                    child: Image.asset("assets/icons/Google.png", width: 24, height: 24),
+                    child: Image.asset(
+                      "assets/icons/Google.png",
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   RichText(
                     textAlign: TextAlign.center,
-                    text: const TextSpan(
+                    text: TextSpan(
                       text: "Don’t have an account? ",
-                      style: TextStyle(color: Colors.black, fontSize: 14),
+                      style: const TextStyle(color: Colors.black, fontSize: 14),
                       children: [
                         TextSpan(
                           text: "Sign Up",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ],
                     ),
